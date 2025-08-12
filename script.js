@@ -6,7 +6,6 @@ tg.expand();
 const theme = tg.themeParams;
 document.body.style.backgroundColor = theme.bg_color;
 document.body.style.color = theme.text_color;
-// Другие переменные CSS
 document.documentElement.style.setProperty('--tg-theme-bg-color', theme.bg_color);
 document.documentElement.style.setProperty('--tg-theme-text-color', theme.text_color);
 document.documentElement.style.setProperty('--tg-theme-button-color', theme.button_color);
@@ -17,10 +16,11 @@ document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', them
 document.documentElement.style.setProperty('--tg-theme-hint-color', theme.hint_color);
 
 const content = document.getElementById('content');
+const API_BASE_URL = 'http://91.149.232.76:8080'; 
 
 async function apiCall(endpoint, method = 'POST', body = {}) {
     body.init_data = tg.initData;
-    const response = await fetch(`/api${endpoint}`, {
+    const response = await fetch(`${API_BASE_URL}/api${endpoint}`, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
@@ -112,7 +112,7 @@ function showAccessMenu() {
 
 function applyPromoAccess() {
     const code = document.getElementById('promo-access').value;
-    applyPromo(code);  // Reuse function
+    applyPromo(code);
 }
 
 function showSupportMenu() {
