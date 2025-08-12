@@ -1,53 +1,51 @@
 const tg = window.Telegram.WebApp;
-tg.ready();
-tg.expand();
+if (!tg) {
+    console.error('Telegram WebApp API is not available!');
+    document.getElementById('content').innerHTML = '<p>Ошибка: Telegram WebApp не инициализирован.</p>';
+} else {
+    tg.ready();
+    tg.expand();
+}
 
 // Установка темы
-const theme = tg.themeParams;
-document.body.style.backgroundColor = theme.bg_color;
-document.body.style.color = theme.text_color;
-document.documentElement.style.setProperty('--tg-theme-bg-color', theme.bg_color);
-document.documentElement.style.setProperty('--tg-theme-text-color', theme.text_color);
-document.documentElement.style.setProperty('--tg-theme-button-color', theme.button_color);
-document.documentElement.style.setProperty('--tg-theme-button-text-color', theme.button_text_color);
-document.documentElement.style.setProperty('--tg-theme-header-bg-color', theme.section_bg_color);
-document.documentElement.style.setProperty('--tg-theme-section-header-text-color', theme.section_header_text_color);
-document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', theme.secondary_bg_color);
-document.documentElement.style.setProperty('--tg-theme-hint-color', theme.hint_color);
+const theme = tg?.themeParams || {};
+document.body.style.backgroundColor = theme.bg_color || '#ffffff';
+document.body.style.color = theme.text_color || '#000000';
+document.documentElement.style.setProperty('--tg-theme-bg-color', theme.bg_color || '#ffffff');
+document.documentElement.style.setProperty('--tg-theme-text-color', theme.text_color || '#000000');
+document.documentElement.style.setProperty('--tg-theme-button-color', theme.button_color || '#0088cc');
+document.documentElement.style.setProperty('--tg-theme-button-text-color', theme.button_text_color || '#ffffff');
+document.documentElement.style.setProperty('--tg-theme-header-bg-color', theme.section_bg_color || '#0055aa');
+document.documentElement.style.setProperty('--tg-theme-section-header-text-color', theme.section_header_text_color || '#ffffff');
+document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', theme.secondary_bg_color || '#e0e0e0');
+document.documentElement.style.setProperty('--tg-theme-hint-color', theme.hint_color || '#666666');
 
 const content = document.getElementById('content');
 const API_BASE_URL = 'http://91.149.232.76:8080'; // Основной URL
-const FALLBACK_API_URL = 'https://your-ngrok-url.ngrok.io'; // Замените на реальный ngrok URL
 
 async function apiCall(endpoint, method = 'POST', body = {}) {
-    if (!tg.initData) {
-        console.error('Telegram initData is missing!');
-        throw new Error('Telegram Web App not initialized');
+    if (!tg || !tg.initData) {
+        console.error('Telegram initData is missing or WebApp not initialized!', tg);
+        throw new Error('Telegram Web App not initialized or initData unavailable');
     }
     body.init_data = tg.initData;
-    const urls = [API_BASE_URL, FALLBACK_API_URL]; // Попробуем оба URL
-    let lastError;
-
-    for (const url of urls) {
-        try {
-            console.log(`Sending ${method} to ${url}${endpoint}`, body);
-            const response = await fetch(`${url}${endpoint}`, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
-            console.log(`Response status: ${response.status}`, await response.text()); // Лог ответа
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP Error ${response.status}: ${errorText}`);
-            }
-            return await response.json();
-        } catch (err) {
-            lastError = err;
-            console.error(`Failed for ${url}:`, err);
+    console.log(`Sending ${method} to ${API_BASE_URL}${endpoint}`, { body, initData: tg.initData });
+    try {
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        console.log(`Response from ${endpoint}:`, await response.text());
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP Error ${response.status}: ${errorText}`);
         }
+        return await response.json();
+    } catch (err) {
+        console.error(`Fetch error for ${endpoint}:`, err);
+        throw err;
     }
-    throw new Error(`All attempts failed: ${lastError.message}`);
 }
 
 function showContent(html) {
