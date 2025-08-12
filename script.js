@@ -16,21 +16,38 @@ document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', them
 document.documentElement.style.setProperty('--tg-theme-hint-color', theme.hint_color);
 
 const content = document.getElementById('content');
-const API_BASE_URL = 'http://91.149.232.76:8080'; // Проверьте этот URL
+const API_BASE_URL = 'http://91.149.232.76:8080'; // Основной URL
+const FALLBACK_API_URL = 'https://your-ngrok-url.ngrok.io'; // Замените на реальный ngrok URL
 
 async function apiCall(endpoint, method = 'POST', body = {}) {
-    body.init_data = tg.initData || ''; // Убедимся, что init_data есть
-    console.log(`Sending ${method} to ${API_BASE_URL}${endpoint}`, body); // Лог для отладки
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-    });
-    if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP Error ${response.status}: ${errorText}`);
+    if (!tg.initData) {
+        console.error('Telegram initData is missing!');
+        throw new Error('Telegram Web App not initialized');
     }
-    return await response.json();
+    body.init_data = tg.initData;
+    const urls = [API_BASE_URL, FALLBACK_API_URL]; // Попробуем оба URL
+    let lastError;
+
+    for (const url of urls) {
+        try {
+            console.log(`Sending ${method} to ${url}${endpoint}`, body);
+            const response = await fetch(`${url}${endpoint}`, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            console.log(`Response status: ${response.status}`, await response.text()); // Лог ответа
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP Error ${response.status}: ${errorText}`);
+            }
+            return await response.json();
+        } catch (err) {
+            lastError = err;
+            console.error(`Failed for ${url}:`, err);
+        }
+    }
+    throw new Error(`All attempts failed: ${lastError.message}`);
 }
 
 function showContent(html) {
