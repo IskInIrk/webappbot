@@ -1,14 +1,14 @@
-const tg = window.Telegram.WebApp;
-if (!tg) {
-    console.error('Telegram WebApp API is not available!');
-    document.getElementById('content').innerHTML = '<p>Ошибка: Telegram WebApp не инициализирован.</p>';
+const tg = window.Telegram?.WebApp || {};
+if (!tg.initData) {
+    console.error('Telegram WebApp not initialized or initData missing!', window.Telegram);
+    document.getElementById('content').innerHTML = '<p>Ошибка: Mini App не инициализирован. Откройте через Telegram.</p>';
 } else {
     tg.ready();
     tg.expand();
 }
 
 // Установка темы
-const theme = tg?.themeParams || {};
+const theme = tg.themeParams || {};
 document.body.style.backgroundColor = theme.bg_color || '#ffffff';
 document.body.style.color = theme.text_color || '#000000';
 document.documentElement.style.setProperty('--tg-theme-bg-color', theme.bg_color || '#ffffff');
@@ -24,24 +24,24 @@ const content = document.getElementById('content');
 const API_BASE_URL = 'http://91.149.232.76:8080'; // Основной URL
 
 async function apiCall(endpoint, method = 'POST', body = {}) {
-    if (!tg || !tg.initData) {
-        console.error('Telegram initData is missing or WebApp not initialized!', tg);
-        throw new Error('Telegram Web App not initialized or initData unavailable');
+    if (!tg.initData) {
+        console.error('initData is missing!', tg);
+        throw new Error('Telegram initData not available');
     }
     body.init_data = tg.initData;
-    console.log(`Sending ${method} to ${API_BASE_URL}${endpoint}`, { body, initData: tg.initData });
+    console.log(`Attempting ${method} to ${API_BASE_URL}${endpoint}`, { body, initDataLength: tg.initData.length });
     try {
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
         });
-        console.log(`Response from ${endpoint}:`, await response.text());
+        const text = await response.text();
+        console.log(`Response from ${endpoint}: Status ${response.status}, Body:`, text);
         if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`HTTP Error ${response.status}: ${errorText}`);
+            throw new Error(`HTTP Error ${response.status}: ${text}`);
         }
-        return await response.json();
+        return JSON.parse(text);
     } catch (err) {
         console.error(`Fetch error for ${endpoint}:`, err);
         throw err;
