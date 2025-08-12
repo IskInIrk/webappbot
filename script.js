@@ -16,17 +16,19 @@ document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', them
 document.documentElement.style.setProperty('--tg-theme-hint-color', theme.hint_color);
 
 const content = document.getElementById('content');
-const API_BASE_URL = 'http://91.149.232.76:8080'; // API на отдельном сервере
+const API_BASE_URL = 'http://91.149.232.76:8080'; // Проверьте этот URL
 
 async function apiCall(endpoint, method = 'POST', body = {}) {
-    body.init_data = tg.initData;
+    body.init_data = tg.initData || ''; // Убедимся, что init_data есть
+    console.log(`Sending ${method} to ${API_BASE_URL}${endpoint}`, body); // Лог для отладки
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
     });
     if (!response.ok) {
-        throw new Error(`Error: ${response.status} - ${await response.text()}`);
+        const errorText = await response.text();
+        throw new Error(`HTTP Error ${response.status}: ${errorText}`);
     }
     return await response.json();
 }
