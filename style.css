@@ -1,44 +1,94 @@
-/* Стили в стиле Telegram */
+/* Стили в стиле Telegram с улучшенным дизайном */
 body {
-    background-color: var(--tg-theme-bg-color);
-    color: var(--tg-theme-text-color);
-    font-family: sans-serif;
+    background-color: var(--tg-theme-bg-color, #ffffff);
+    color: var(--tg-theme-text-color, #000000);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     margin: 0;
     padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: background-color 0.3s ease;
 }
 
 header {
-    background-color: var(--tg-theme-header-bg-color);
-    padding: 10px;
+    background: linear-gradient(90deg, var(--tg-theme-header-bg-color, #0088cc), var(--tg-theme-secondary-bg-color, #0055aa));
+    padding: 15px;
     text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 h1 {
-    color: var(--tg-theme-section-header-text-color);
+    color: var(--tg-theme-section-header-text-color, #ffffff);
     margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 nav {
     display: flex;
     flex-direction: column;
-    padding: 10px;
+    padding: 20px;
+    gap: 10px;
+    background-color: var(--tg-theme-bg-color, #f5f5f5);
+    border-bottom: 1px solid var(--tg-theme-secondary-bg-color, #e0e0e0);
 }
 
 button {
-    background-color: var(--tg-theme-button-color);
-    color: var(--tg-theme-button-text-color);
+    background-color: var(--tg-theme-button-color, #0088cc);
+    color: var(--tg-theme-button-text-color, #ffffff);
     border: none;
-    padding: 10px;
+    padding: 12px 20px;
     margin: 5px 0;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 button:hover {
-    background-color: var(--tg-theme-secondary-bg-color);
+    background-color: var(--tg-theme-secondary-bg-color, #0055aa);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 #content {
+    padding: 20px;
+    color: var(--tg-theme-hint-color, #666666);
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+input {
     padding: 10px;
-    color: var(--tg-theme-hint-color);
+    margin: 10px 0;
+    border: 1px solid var(--tg-theme-secondary-bg-color, #e0e0e0);
+    border-radius: 8px;
+    font-size: 1rem;
+    width: 100%;
+    max-width: 300px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+input:focus {
+    border-color: var(--tg-theme-button-color, #0088cc);
+    outline: none;
+}
+
+p {
+    line-height: 1.6;
+    margin: 10px 0;
 }
