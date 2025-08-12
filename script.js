@@ -16,11 +16,11 @@ document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', them
 document.documentElement.style.setProperty('--tg-theme-hint-color', theme.hint_color);
 
 const content = document.getElementById('content');
-const API_BASE_URL = 'http://91.149.232.76:8080'; 
+const API_BASE_URL = 'http://91.149.232.76:8080'; // Указан ваш сервер
 
 async function apiCall(endpoint, method = 'POST', body = {}) {
     body.init_data = tg.initData;
-    const response = await fetch(`${API_BASE_URL}/api${endpoint}`, {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, { // Убрал /api из пути, так как FastAPI обрабатывает корень
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
@@ -111,22 +111,4 @@ function showAccessMenu() {
 }
 
 function applyPromoAccess() {
-    const code = document.getElementById('promo-access').value;
-    applyPromo(code);
-}
-
-function showSupportMenu() {
-    showContent(`
-        <button onclick="showInstructions('android')">Android</button>
-        <button onclick="showInstructions('ios')">iOS</button>
-        <button onclick="showInstructions('windows')">Windows</button>
-        <button onclick="showInstructions('macos')">macOS</button>
-        <p>Поддержка: @YourSupportTelegram</p>
-    `);
-}
-
-function showInstructions(device) {
-    apiCall('/instructions?device=' + device, 'GET').then(data => {
-        showContent(`<p>${data.instructions}</p>`);
-    }).catch(err => showContent(`<p>Ошибка: ${err}</p>`));
-}
+    const code = document.get
