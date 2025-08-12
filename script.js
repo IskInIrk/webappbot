@@ -16,17 +16,17 @@ document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', them
 document.documentElement.style.setProperty('--tg-theme-hint-color', theme.hint_color);
 
 const content = document.getElementById('content');
-const API_BASE_URL = 'http://91.149.232.76:8080'; // Указан ваш сервер
+const API_BASE_URL = 'http://91.149.232.76:8080'; // API на отдельном сервере
 
 async function apiCall(endpoint, method = 'POST', body = {}) {
     body.init_data = tg.initData;
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, { // Убрал /api из пути, так как FastAPI обрабатывает корень
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
     });
     if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
+        throw new Error(`Error: ${response.status} - ${await response.text()}`);
     }
     return await response.json();
 }
@@ -42,13 +42,13 @@ function showFreeAccess() {
         } else {
             showContent(`<p>${data.message}</p>`);
         }
-    }).catch(err => showContent(`<p>Ошибка: ${err}</p>`));
+    }).catch(err => showContent(`<p>Ошибка: ${err.message}</p>`));
 }
 
 function showProfile() {
     apiCall('/profile').then(data => {
         showContent(`<p>${data.profile}</p>`);
-    }).catch(err => showContent(`<p>Ошибка: ${err}</p>`));
+    }).catch(err => showContent(`<p>Ошибка: ${err.message}</p>`));
 }
 
 function showStatusMenu() {
@@ -58,7 +58,7 @@ function showStatusMenu() {
         } else {
             showContent(`<p>${data.message}</p>`);
         }
-    }).catch(err => showContent(`<p>Ошибка: ${err}</p>`));
+    }).catch(err => showContent(`<p>Ошибка: ${err.message}</p>`));
 }
 
 function showSubscriptionMenu() {
@@ -80,26 +80,26 @@ function pay(months) {
         } else {
             showContent(`<p>${data.message}</p>`);
         }
-    }).catch(err => showContent(`<p>Ошибка: ${err}</p>`));
+    }).catch(err => showContent(`<p>Ошибка: ${err.message}</p>`));
 }
 
 function checkPayment() {
     apiCall('/check_payment').then(data => {
         showContent(`<p>${data.message || data.status}</p>`);
-    }).catch(err => showContent(`<p>Ошибка: ${err}</p>`));
+    }).catch(err => showContent(`<p>Ошибка: ${err.message}</p>`));
 }
 
 function applyPromo() {
     const code = document.getElementById('promo').value;
     apiCall('/apply_promo', 'POST', {code}).then(data => {
         showContent(`<p>${data.message}</p>`);
-    }).catch(err => showContent(`<p>Ошибка: ${err}</p>`));
+    }).catch(err => showContent(`<p>Ошибка: ${err.message}</p>`));
 }
 
 function showReferral() {
     apiCall('/referral').then(data => {
         showContent(`<p>Ваша реферальная ссылка: ${data.referral_link}</p>`);
-    }).catch(err => showContent(`<p>Ошибка: ${err}</p>`));
+    }).catch(err => showContent(`<p>Ошибка: ${err.message}</p>`));
 }
 
 function showAccessMenu() {
@@ -111,4 +111,22 @@ function showAccessMenu() {
 }
 
 function applyPromoAccess() {
-    const code = document.get
+    const code = document.getElementById('promo-access').value;
+    applyPromo(code);
+}
+
+function showSupportMenu() {
+    showContent(`
+        <button onclick="showInstructions('android')">Android</button>
+        <button onclick="showInstructions('ios')">iOS</button>
+        <button onclick="showInstructions('windows')">Windows</button>
+        <button onclick="showInstructions('macos')">macOS</button>
+        <p>Поддержка: @YourSupportTelegram</p>
+    `);
+}
+
+function showInstructions(device) {
+    apiCall('/instructions?device=' + device, 'GET').then(data => {
+        showContent(`<p>${data.instructions}</p>`);
+    }).catch(err => showContent(`<p>Ошибка: ${err.message}</p>`));
+}
